@@ -10,7 +10,9 @@ def ReadUsers(usersFile, users):
 
         for row in reader:
 
-            users[row['"User-ID"']] = row['"Location"'], row['"Age"']
+            if "usa" in row['"Location"'] or "canada" in row['"Location"']:
+
+                users[row['"User-ID"']] = row['"Location"'], row['"Age"']
 
 def ReadBooks(booksFile, books):
 
@@ -26,12 +28,13 @@ def ReadBooks(booksFile, books):
                                    row['"Year-Of-Publication"'], row['"Publisher"']
 
 
-def ReadBookRatings(bookRatingsFile, bookRatings):
+def ReadBookRatings(bookRatingsFile):
 
     with open(bookRatingsFile, newline='', encoding='latin-1') as csvfile:
 
-        reader = csv.DictReader(csvfile, delimiter=';', quotechar='|')
+        reader = csv.reader(csvfile, delimiter=';', quotechar='|')
 
-        for row in reader:
+        return list(reader)
+        #for row in reader:
 
-            bookRatings[row['User-ID']] = row['ISBN'], row['Book-Rating']
+            #bookRatings[row['User-ID']] = row['ISBN'], row['Book-Rating']
