@@ -1,32 +1,42 @@
 import csv
+import numpy as np
 
-
-def ReadUsers(usersFile, users):
+def ReadUsers(usersFile, users, dataCount = -1):
 
     with open(usersFile, newline='', encoding='latin-1') as csvfile:
 
         reader = csv.DictReader(csvfile, delimiter=';', quotechar='|')
 
+        count = 0
 
         for row in reader:
+
+            if count > dataCount and dataCount is not -1:
+                break
 
             if "usa" in row['"Location"'] or "canada" in row['"Location"']:
 
                 users[row['"User-ID"']] = row['"Location"'], row['"Age"']
 
-def ReadBooks(booksFile, books):
+            count += 1
+
+def ReadBooks(booksFile, books, dataCount = -1):
 
     with open(booksFile, newline='', encoding='latin-1') as csvfile:
 
         reader = csv.DictReader(csvfile, delimiter=';', quotechar='|')
 
-
+        count = 0
 
         for row in reader:
+
+            if count > dataCount and dataCount is not -1:
+                break
 
             books[row['"ISBN"']] = row['"Book-Title"'], row['"Book-Author"'], \
                                    row['"Year-Of-Publication"'], row['"Publisher"']
 
+            count += 1
 
 def ReadBookRatings(bookRatingsFile):
 
@@ -38,3 +48,11 @@ def ReadBookRatings(bookRatingsFile):
         #for row in reader:
 
             #bookRatings[row['User-ID']] = row['ISBN'], row['Book-Rating']
+
+
+def FilterRatings(ratings, users, books):
+
+    print(len(books), len(users))
+    array = np.zeros((len(users), len(books)))
+
+

@@ -7,18 +7,18 @@ print(np.__version__)
 users = {}
 books = {}
 
-r.ReadUsers("/home/hakanmint/Desktop/oKuL/409/ASSignment 1/Assignment1/data/BX-Users.csv", users)
-#bookRatings = r.ReadBookRatings("/home/hakanmint/Desktop/oKuL/409/ASSignment 1/Assignment1/data/BX-Book-Ratings-Train.csv")
+bookRatings = r.ReadBookRatings("/home/hakanmint/Desktop/oKuL/409/ASSignment 1/Assignment1/data/BX-Book-Ratings-Train.csv")
 
-print(users.__len__())
+r.ReadUsers("/home/hakanmint/Desktop/oKuL/409/ASSignment 1/Assignment1/data/BX-Users.csv", users, 100)
+r.ReadBooks("/home/hakanmint/Desktop/oKuL/409/ASSignment 1/Assignment1/data/BX-Books.csv", books, 100)
 
-#bookRatings = np.array(bookRatings[1:])
+bookRatings = np.array(bookRatings[1:])
 
-#print(bookRatings)
+r.FilterRatings(bookRatings, users, books)
 
 ##
-#1. Matrix oluştur, her satır bir user her stun bir kitap
-#2. Satırlar arasında similarity bul.
-#
+#TODO:1. Matrix oluştur, her satır bir user her stun bir kitap
+#TODO:2. Satırlar arasında similarity bul.
+#TODO:3. Verilen dataya en yakın k elemanı bul(similarity)
 #
 ##
