@@ -38,13 +38,14 @@ def ReadBooks(booksFile, books, dataCount = -1):
 
             count += 1
 
-def ReadBookRatings(bookRatingsFile):
+def ReadBookRatings(bookRatingsFile, dataCount = 0):
 
     with open(bookRatingsFile, newline='', encoding='latin-1') as csvfile:
 
         reader = csv.reader(csvfile, delimiter=';', quotechar='|')
-
-        return list(reader)
+        reader = list(reader)
+        reader = reader[:dataCount or None]
+        return reader
         #for row in reader:
 
             #bookRatings[row['User-ID']] = row['ISBN'], row['Book-Rating']
@@ -53,6 +54,17 @@ def ReadBookRatings(bookRatingsFile):
 def FilterRatings(ratings, users, books):
 
     print(len(books), len(users))
-    array = np.zeros((len(users), len(books)))
 
+    tempBooks = set()
+    tempUsers = set()
 
+    #TODO: Extra filtering uygulanabilir.
+    for rat in ratings:
+        tempBooks.add(rat[1])
+
+        if('"' + rat[0] + '"' in users.keys()):
+            tempUsers.add(rat[0])
+
+    print(len(tempBooks), len(tempUsers))
+
+    array = np.zeros((len(tempBooks), len(tempUsers)))
