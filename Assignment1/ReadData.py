@@ -67,4 +67,18 @@ def FilterRatings(ratings, users, books):
 
     print(len(tempBooks), len(tempUsers))
 
-    array = np.zeros((len(tempBooks), len(tempUsers)))
+    array = np.zeros((len(tempUsers), len(tempBooks)))
+
+    tempUsers = list(tempUsers)
+    tempBooks = list(tempBooks)
+
+    for rat in ratings:
+
+        try:
+            array[tempUsers.index(rat[0])][tempBooks.index(rat[1])] = rat[2]
+        except:
+            continue
+
+
+    print(array)
+
