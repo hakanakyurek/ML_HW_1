@@ -1,5 +1,19 @@
 import csv
 import numpy as np
+import pandas as p
+
+def PandaReader(ratings, users, books):
+    ratingData = p.read_csv(ratings, sep=';', encoding='latin-1', error_bad_lines=False)
+    userData = p.read_csv(users, sep=';', encoding='latin-1', error_bad_lines=False)
+    bookData = p.read_csv(books, sep=';', encoding='latin-1', error_bad_lines=False)
+    combinedData = userData.merge(ratingData, right_on= 'User-ID', left_on= 'User-ID', how='inner')
+    combinedData = bookData.merge(combinedData, right_on= 'ISBN', left_on= 'ISBN', how='inner')
+
+    filteredData = combinedData[combinedData['Location'].str.contains("usa|canada")]
+    print(filteredData)
+
+
+
 
 def ReadUsers(usersFile, users, dataCount = -1):
 
@@ -53,17 +67,20 @@ def ReadBookRatings(bookRatingsFile, dataCount = 0):
 
 def FilterRatings(ratings, users, books):
 
-    print(len(books), len(users))
+    print(len(books), len(users), len(ratings))
 
     tempBooks = set()
     tempUsers = set()
 
     #TODO: Extra filtering uygulanabilir.
     for rat in ratings:
-        tempBooks.add(rat[1])
 
-        if('"' + rat[0] + '"' in users.keys()):
+        if ('"' + rat[0] + '"' in users.keys()):
             tempUsers.add(rat[0])
+        if ('"' + rat[1] + '"' in books.keys()):
+            tempBooks.add(rat[1])
+
+
 
     print(len(tempBooks), len(tempUsers))
 
@@ -72,12 +89,14 @@ def FilterRatings(ratings, users, books):
     tempUsers = list(tempUsers)
     tempBooks = list(tempBooks)
 
+    '''
     for rat in ratings:
 
         try:
             array[tempUsers.index(rat[0])][tempBooks.index(rat[1])] = rat[2]
-        except:
+        except(ValueError):
             continue
+    '''
 
 
     print(array)
