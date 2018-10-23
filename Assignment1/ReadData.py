@@ -1,15 +1,28 @@
 import csv
 import numpy as np
 import pandas as p
+import time
+
 
 def PandaReader(ratings, users, books):
+    start = time.time()
     ratingData = p.read_csv(ratings, sep=';', encoding='latin-1', error_bad_lines=False)
     userData = p.read_csv(users, sep=';', encoding='latin-1', error_bad_lines=False)
-    bookData = p.read_csv(books, sep=';', encoding='latin-1', error_bad_lines=False)
+    bookData = p.read_csv(books, sep=';', encoding='latin-1', error_bad_lines=False,
+                          usecols= ['ISBN', 'Book-Title', 'Book-Author', 'Publisher'])
+
     combinedData = userData.merge(ratingData, right_on= 'User-ID', left_on= 'User-ID', how='inner')
     combinedData = bookData.merge(combinedData, right_on= 'ISBN', left_on= 'ISBN', how='inner')
 
     filteredData = combinedData[combinedData['Location'].str.contains("usa|canada")]
+
+    filteredData = filteredData.sort_values(by=['Book-Rating'])
+
+
+
+    end = time.time()
+    print(end - start)
+
     print(filteredData)
 
 
@@ -71,15 +84,19 @@ def FilterRatings(ratings, users, books):
 
     tempBooks = set()
     tempUsers = set()
-
+    count =0
     #TODO: Extra filtering uygulanabilir.
     for rat in ratings:
 
         if ('"' + rat[0] + '"' in users.keys()):
             tempUsers.add(rat[0])
-        if ('"' + rat[1] + '"' in books.keys()):
-            tempBooks.add(rat[1])
 
+            if ('"' + rat[1] + '"' in books.keys()):
+                tempBooks.add(rat[1])
+
+                count += 1
+
+    print(count)
 
 
     print(len(tempBooks), len(tempUsers))
@@ -89,15 +106,26 @@ def FilterRatings(ratings, users, books):
     tempUsers = list(tempUsers)
     tempBooks = list(tempBooks)
 
-    '''
+    bookIndices = {}
+    userIndices = {}
+
+    for i in range(0, len(tempBooks)):
+        bookIndices[tempBooks[i]] = i
+
+    for i in range(0, len(tempUsers)):
+        userIndices[tempUsers[i]] = i
+
+
+#    tempBooks = {ele:tempBooks.index(ele) for ele in tempBooks}
+#    tempUsers = {ele:tempUsers.index(ele) for ele in tempUsers}
+
+
     for rat in ratings:
-
         try:
-            array[tempUsers.index(rat[0])][tempBooks.index(rat[1])] = rat[2]
-        except(ValueError):
-            continue
-    '''
+            array [userIndices[rat[0]]] [bookIndices[rat[1]]] = int(rat[2])
 
+        except KeyError:
+            continue
 
     print(array)
 
