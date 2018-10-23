@@ -95,8 +95,8 @@ def FilterRatings(ratings, users, books):
 
                 count += 1
 
-    print(count)
+    print("Rating number: ", count)
 
-    print(len(tempBooks), len(tempUsers))
+    print("Unique books, users: ", len(tempBooks), len(tempUsers))
 
     return tempUsers, tempBooks

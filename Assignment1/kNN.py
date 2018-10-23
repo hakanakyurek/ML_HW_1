@@ -4,7 +4,7 @@ from numpy.linalg import norm
 from pympler import asizeof
 
 
-def ConstructMatrix(tempUsers, tempBooks, ratings):
+def ConstructTrainMatrix(tempUsers, tempBooks, ratings):
 
     array = np.zeros((len(tempUsers), len(tempBooks)))
 
@@ -30,7 +30,10 @@ def ConstructMatrix(tempUsers, tempBooks, ratings):
         except KeyError:
             continue
 
-    print(array, asizeof.asizeof(array))
+    print("Train matrix size: ", asizeof.asizeof(array))
+
+def ConstructTestMatrix(testData):
+    print(testData)
 
 
 def GetNeighbours(dataset, testData, k):

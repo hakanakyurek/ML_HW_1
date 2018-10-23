@@ -4,6 +4,7 @@ import ReadData as r
 import kNN as knn
 import time
 
+dataSplit = 990/1000
 
 dataset = [[0, 2, 3, 1], [6, 2, 3, 6], [6, 6, 6, 6], [2, 5, 1, 0], [0, 2, 2, 4]]
 testdata = [0, 2, 3, 0]
@@ -23,20 +24,22 @@ trainData = r.ReadBookRatings("/home/hakanmint/Desktop/oKuL/409/ASSignment 1/Ass
 r.ReadUsers("/home/hakanmint/Desktop/oKuL/409/ASSignment 1/Assignment1/data/BX-Users.csv", users)
 r.ReadBooks("/home/hakanmint/Desktop/oKuL/409/ASSignment 1/Assignment1/data/BX-Books.csv", books)
 
-trainData = np.array(trainData[1: int(990/1000 * len(trainData))])
-
+testData = np.array(trainData[int(dataSplit * len(trainData)):])
+trainData = np.array(trainData[1: int(dataSplit * len(trainData))])
 
 end = time.time()
-print(end - start)
+print("Read data time: ", end - start)
 
 
 start = time.time()
 
 tempUsers, tempBooks = r.FilterRatings(trainData, users, books)
-matrix = knn.ConstructMatrix(tempUsers, tempBooks, trainData)
+trainMatrix = knn.ConstructTrainMatrix(tempUsers, tempBooks, trainData)
+
+testDictionary = knn.ConstructTestMatrix(testData)
 
 end = time.time()
-print(end - start)
+print("train data matrix time: ", end - start)
 
 
 
