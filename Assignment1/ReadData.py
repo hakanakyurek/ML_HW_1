@@ -3,7 +3,6 @@ import numpy as np
 import pandas as p
 import time
 
-
 def PandaReader(ratings, users, books):
     start = time.time()
     ratingData = p.read_csv(ratings, sep=';', encoding='latin-1', error_bad_lines=False)
@@ -98,34 +97,6 @@ def FilterRatings(ratings, users, books):
 
     print(count)
 
-
     print(len(tempBooks), len(tempUsers))
 
-    array = np.zeros((len(tempUsers), len(tempBooks)))
-
-    tempUsers = list(tempUsers)
-    tempBooks = list(tempBooks)
-
-    bookIndices = {}
-    userIndices = {}
-
-    for i in range(0, len(tempBooks)):
-        bookIndices[tempBooks[i]] = i
-
-    for i in range(0, len(tempUsers)):
-        userIndices[tempUsers[i]] = i
-
-
-#    tempBooks = {ele:tempBooks.index(ele) for ele in tempBooks}
-#    tempUsers = {ele:tempUsers.index(ele) for ele in tempUsers}
-
-
-    for rat in ratings:
-        try:
-            array [userIndices[rat[0]]] [bookIndices[rat[1]]] = int(rat[2])
-
-        except KeyError:
-            continue
-
-    print(array)
-
+    return tempUsers, tempBooks

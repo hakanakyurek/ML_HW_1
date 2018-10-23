@@ -1,7 +1,36 @@
-from scipy import spatial
+import numpy as np
 from numpy import dot
 from numpy.linalg import norm
+from pympler import asizeof
 
+
+def ConstructMatrix(tempUsers, tempBooks, ratings):
+
+    array = np.zeros((len(tempUsers), len(tempBooks)))
+
+    tempUsers = list(tempUsers)
+    tempBooks = list(tempBooks)
+
+    bookIndices = {}
+    userIndices = {}
+
+    for i in range(0, len(tempBooks)):
+        bookIndices[tempBooks[i]] = i
+
+    for i in range(0, len(tempUsers)):
+        userIndices[tempUsers[i]] = i
+
+    #    tempBooks = {ele:tempBooks.index(ele) for ele in tempBooks}
+    #    tempUsers = {ele:tempUsers.index(ele) for ele in tempUsers}
+
+    for rat in ratings:
+        try:
+            array[userIndices[rat[0]]][bookIndices[rat[1]]] = int(rat[2])
+
+        except KeyError:
+            continue
+
+    print(array, asizeof.asizeof(array))
 
 
 def GetNeighbours(dataset, testData, k):
