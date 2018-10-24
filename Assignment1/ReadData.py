@@ -83,20 +83,20 @@ def FilterRatings(ratings, users, books):
 
     tempBooks = set()
     tempUsers = set()
-    count =0
-    #TODO: Extra filtering uygulanabilir.
+    count = 0
+
     for rat in ratings:
 
         if ('"' + rat[0] + '"' in users.keys()):
-            tempUsers.add(rat[0])
 
             if ('"' + rat[1] + '"' in books.keys()):
                 tempBooks.add(rat[1])
+                tempUsers.add(rat[0])
 
                 count += 1
 
     print("Rating number: ", count)
 
-    print("Unique books, users: ", len(tempBooks), len(tempUsers))
+    print("Unique books, users in training data: ", len(tempBooks), len(tempUsers))
 
     return tempUsers, tempBooks
