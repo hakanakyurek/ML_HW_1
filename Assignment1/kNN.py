@@ -6,7 +6,7 @@ from pympler import asizeof
 
 def ConstructTrainMatrix(tempUsers, tempBooks, ratings):
 
-    array = np.zeros((len(tempUsers), len(tempBooks)))
+    array = np.zeros((len(tempUsers), len(tempBooks)), dtype=int)
 
     tempUsers = list(tempUsers)
     tempBooks = list(tempBooks)
@@ -25,16 +25,14 @@ def ConstructTrainMatrix(tempUsers, tempBooks, ratings):
 
     for rat in ratings:
         try:
-            array[userIndices[rat[0]]][bookIndices[rat[1]]] = int(rat[2])
+            array[userIndices[rat[0]]][bookIndices[rat[1]]] = rat[2]
 
         except KeyError:
             continue
 
     print("Train matrix size: ", asizeof.asizeof(array))
 
-def ConstructTestMatrix(testData):
-    print(testData)
-
+    return array, bookIndices
 
 def GetNeighbours(dataset, testData, k):
 

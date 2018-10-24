@@ -4,14 +4,7 @@ import ReadData as r
 import kNN as knn
 import time
 
-dataSplit = 990/1000
-
-dataset = [[0, 2, 3, 1], [6, 2, 3, 6], [6, 6, 6, 6], [2, 5, 1, 0], [0, 2, 2, 4]]
-testdata = [0, 2, 3, 0]
-
-a = knn.GetNeighbours(dataset, testdata, 2)
-
-print(a)
+dataSplit = 900/1000
 
 #r.PandaReader("/home/hakanmint/Desktop/oKuL/409/ASSignment 1/Assignment1/data/BX-Book-Ratings-Train.csv","/home/hakanmint/Desktop/oKuL/409/ASSignment 1/Assignment1/data/BX-Users.csv","/home/hakanmint/Desktop/oKuL/409/ASSignment 1/Assignment1/data/BX-Books.csv")
 
@@ -19,13 +12,10 @@ start = time.time()
 users = {}
 books = {}
 
-trainData = r.ReadBookRatings("/home/hakanmint/Desktop/oKuL/409/ASSignment 1/Assignment1/data/BX-Book-Ratings-Train.csv")
+allData = r.ReadBookRatings("/home/hakanmint/Desktop/oKuL/409/ASSignment 1/Assignment1/data/BX-Book-Ratings-Train.csv")
 
 r.ReadUsers("/home/hakanmint/Desktop/oKuL/409/ASSignment 1/Assignment1/data/BX-Users.csv", users)
 r.ReadBooks("/home/hakanmint/Desktop/oKuL/409/ASSignment 1/Assignment1/data/BX-Books.csv", books)
-
-testData = np.array(trainData[int(dataSplit * len(trainData)):])
-trainData = np.array(trainData[1: int(dataSplit * len(trainData))])
 
 end = time.time()
 print("Read data time: ", end - start)
@@ -33,14 +23,20 @@ print("Read data time: ", end - start)
 
 start = time.time()
 
-tempUsers, tempBooks = r.FilterRatings(trainData, users, books)
-trainMatrix = knn.ConstructTrainMatrix(tempUsers, tempBooks, trainData)
+tempUsers, tempBooks = r.FilterRatings(allData, users, books)
 
-testDictionary = knn.ConstructTestMatrix(testData)
+allData = np.array(allData)
+
+mainMatrix, bookIndices = knn.ConstructTrainMatrix(tempUsers, tempBooks, allData)
+
+testData = np.array(mainMatrix[int(dataSplit * len(mainMatrix)):])
+trainData = np.array(mainMatrix[0: int(dataSplit * len(mainMatrix))])
 
 end = time.time()
 print("train data matrix time: ", end - start)
 
+
+print(testData, "\n", trainData)
 
 
 ##
