@@ -2,7 +2,7 @@ import numpy as np
 from numpy import dot
 from numpy.linalg import norm
 from pympler import asizeof
-
+import math
 
 def ConstructTrainMatrix(tempUsers, tempBooks, ratings):
 
@@ -13,15 +13,14 @@ def ConstructTrainMatrix(tempUsers, tempBooks, ratings):
 
     bookIndices = {}
     userIndices = {}
+    userRatingMap = {}
+    bookRatingMap = {}
 
     for i in range(0, len(tempBooks)):
         bookIndices[tempBooks[i]] = i
 
     for i in range(0, len(tempUsers)):
         userIndices[tempUsers[i]] = i
-
-    #    tempBooks = {ele:tempBooks.index(ele) for ele in tempBooks}
-    #    tempUsers = {ele:tempUsers.index(ele) for ele in tempUsers}
 
     for rat in ratings:
         try:
@@ -32,34 +31,34 @@ def ConstructTrainMatrix(tempUsers, tempBooks, ratings):
 
     print("Train matrix size: ", asizeof.asizeof(array))
 
+
     return array, bookIndices
 
+#Get from Matrix
 def GetNeighbours(dataset, testData, k):
-
-    count = 0
 
     neightbours = []
 
-    for data in dataset:
-        sim = CosineBasedSimilarity(data, testData)
-        for i in range (0, k):
+    for test in testData:
 
-            if(len(neightbours) == 0):
-                neightbours.append([data, sim])
-                break
+        for data in dataset:
+            sim = CosineBasedSimilarity(data, test)
 
-            elif len(neightbours) < k:
-                neightbours.append([data, sim])
-                break
+            neightbours.append([data, sim])
 
-            elif(sim > neightbours[i][1]):
-                neightbours.pop(i)
-                neightbours.append([data, sim])
-                break
+
 
     return neightbours
-
+#Using Matrix
 def CosineBasedSimilarity(var1, var2):
     #return 1 - spatial.distance.cosine(var1, var2)
-    return dot(var1, var2) / (norm(var1) * norm(var2))
+    x = norm(var1)
+    y = norm(var2)
+
+    if(x == 0 or y == 0):
+        return 0
+
+    result = dot(var1, var2) / x * y
+    #print("result: ", result)
+    return result
 

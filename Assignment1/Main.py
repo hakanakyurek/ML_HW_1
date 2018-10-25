@@ -3,12 +3,14 @@ from sklearn import neighbors
 import ReadData as r
 import kNN as knn
 import time
+import threading
 
-dataSplit = 900/1000
+
+dataSplit = 4000/12779
 
 #r.PandaReader("/home/hakanmint/Desktop/oKuL/409/ASSignment 1/Assignment1/data/BX-Book-Ratings-Train.csv","/home/hakanmint/Desktop/oKuL/409/ASSignment 1/Assignment1/data/BX-Users.csv","/home/hakanmint/Desktop/oKuL/409/ASSignment 1/Assignment1/data/BX-Books.csv")
 
-start = time.time()
+timer = time.time()
 users = {}
 books = {}
 
@@ -17,11 +19,11 @@ allData = r.ReadBookRatings("/home/hakanmint/Desktop/oKuL/409/ASSignment 1/Assig
 r.ReadUsers("/home/hakanmint/Desktop/oKuL/409/ASSignment 1/Assignment1/data/BX-Users.csv", users)
 r.ReadBooks("/home/hakanmint/Desktop/oKuL/409/ASSignment 1/Assignment1/data/BX-Books.csv", books)
 
-end = time.time()
-print("Read data time: ", end - start)
+
+print("Read data time: ", time.time() - timer)
 
 
-start = time.time()
+timer = time.time()
 
 tempUsers, tempBooks = r.FilterRatings(allData, users, books)
 
@@ -29,15 +31,19 @@ allData = np.array(allData)
 
 mainMatrix, bookIndices = knn.ConstructTrainMatrix(tempUsers, tempBooks, allData)
 
-testData = np.array(mainMatrix[int(dataSplit * len(mainMatrix)):])
-trainData = np.array(mainMatrix[0: int(dataSplit * len(mainMatrix))])
+testData = np.array(mainMatrix[0:int(dataSplit * len(mainMatrix))])
+trainData = np.array(mainMatrix[int(dataSplit * len(mainMatrix)):])
 
-end = time.time()
-print("train data matrix time: ", end - start)
+testData[0][1] = 3
+print(len(testData), len(trainData))
 
+print("matrix creation time: ", time.time() - timer)
 
-print(testData, "\n", trainData)
+timer = time.time()
 
+print(knn.GetNeighbours(trainData, testData, 2))
+
+print("knn time: ", time.time() - timer)
 
 ##
 #TODO:1. Matrix oluştur, her satır bir user her stun bir kitap

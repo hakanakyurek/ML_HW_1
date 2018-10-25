@@ -72,10 +72,6 @@ def ReadBookRatings(bookRatingsFile, dataCount = 0):
         reader = list(reader)
         reader = reader[:dataCount or None]
         return reader
-        #for row in reader:
-
-            #bookRatings[row['User-ID']] = row['ISBN'], row['Book-Rating']
-
 
 def FilterRatings(ratings, users, books):
 
@@ -90,6 +86,7 @@ def FilterRatings(ratings, users, books):
         if ('"' + rat[0] + '"' in users.keys()):
 
             if ('"' + rat[1] + '"' in books.keys()):
+
                 tempBooks.add(rat[1])
                 tempUsers.add(rat[0])
 
