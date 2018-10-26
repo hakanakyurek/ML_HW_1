@@ -17,12 +17,15 @@ print("Read data time: ", time.time() - timer)
 
 timer = time.time()
 
-knn.ConstructTrainModel(ratings)
+userRatingMap, bookRatingMap = knn.ConstructTrainModel(ratings)
 
 print("matrix creation time: ", time.time() - timer)
 
 timer = time.time()
 
+sim = knn.ValidateData(userRatingMap, bookRatingMap, split=2)
+
+print("sim dict: ", sim)
 print("knn time: ", time.time() - timer)
 
 ##
