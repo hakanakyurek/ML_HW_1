@@ -7,13 +7,35 @@ import math
 
 def ConstructTrainModel(filteredData):
 
-    filteredData.set_index("User-ID", drop=False, inplace=True)
-    userRatingMap = filteredData.to_dict(orient="index")
+    users = filteredData['User-ID'].tolist()
+    books = filteredData['ISBN'].tolist()
+    ratings = filteredData['Book-Rating'].tolist()
 
-    filteredData.set_index("ISBN", drop=True, inplace=True)
-    bookRatingMap = filteredData.to_dict(orient="index")
+    userRatingMap = {}
+    bookRatingMap = {}
 
-    for rat in userRatingMap.values():
-        del rat['User-ID']
-        print(rat)
+    for x in range (len(users)):
 
+        user = users[x]
+        book = books[x]
+        rating = ratings[x]
+
+        if user not in userRatingMap:
+            userRatingMap[user] = {}
+        if book not in bookRatingMap:
+            bookRatingMap[book] = {}
+
+        userRatingMap[user][book] = rating
+        bookRatingMap[book][user] = rating
+
+    return userRatingMap, bookRatingMap
+
+
+def CosineSimiarity():
+    print("empty")
+
+def AdjCosineSimilarity():
+    print("empty")
+
+def CorrolationSimilarity():
+    print("empty")
