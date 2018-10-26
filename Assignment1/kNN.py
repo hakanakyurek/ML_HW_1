@@ -2,6 +2,7 @@ import numpy as np
 from numpy import dot
 from numpy.linalg import norm
 from pympler import asizeof
+import pandas as pd
 import math
 
 def ConstructTrainMatrix(tempUsers, tempBooks, ratings):
@@ -25,7 +26,13 @@ def ConstructTrainMatrix(tempUsers, tempBooks, ratings):
     for rat in ratings:
         try:
             array[userIndices[rat[0]]][bookIndices[rat[1]]] = rat[2]
+            '''
+            userRatingMap.setdefault(rat[0], [])
+            userRatingMap[rat[0]].append([rat[1], rat[2]])
 
+            bookRatingMap.setdefault(rat[1], [])
+            bookRatingMap[rat[1]].append([rat[0], rat[2]])
+            '''
         except KeyError:
             continue
 
@@ -33,6 +40,18 @@ def ConstructTrainMatrix(tempUsers, tempBooks, ratings):
 
 
     return array, bookIndices
+
+def ConstructTrainModel(filteredData):
+
+    filteredData.set_index("User-ID", drop=False, inplace=True)
+    userRatingMap = filteredData.to_dict(orient="index")
+
+    filteredData.set_index("ISBN", drop=True, inplace=True)
+    bookRatingMap = filteredData.to_dict(orient="index")
+
+    for rat in userRatingMap.values():
+        del rat['User-ID']
+        print(rat)
 
 #Get from Matrix
 def GetNeighbours(dataset, testData, k):
