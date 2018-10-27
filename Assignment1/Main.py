@@ -23,9 +23,9 @@ print("matrix creation time: ", time.time() - timer)
 
 timer = time.time()
 
-sim = knn.ValidateData(userRatingMap, bookRatingMap, split=2)
+sim = knn.ValidateData(userRatingMap, bookRatingMap, split=2, k=2)
 
-print("sim dict: ", sim)
+#print("sim dict: ", sim)
 print("knn time: ", time.time() - timer)
 
 ##

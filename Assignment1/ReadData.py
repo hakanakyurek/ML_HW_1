@@ -15,6 +15,7 @@ def PandaReader(ratings, users, books):
 
     filteredData = combinedData[combinedData['Location'].str.contains("usa|canada")]
 
+    #filteredData = filteredData.sort_values(by='User-ID')
     filteredData = filteredData[['ISBN', 'User-ID', 'Book-Rating']]
 
     return filteredData
