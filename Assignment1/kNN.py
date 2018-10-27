@@ -43,44 +43,51 @@ def ValidateData(userRatingMap, bookRatingMap, function = "Cos", split = 1, k = 
     for test in testData:
 
         #print("test ", test, testData[test].keys(), testData[test].values())
-        simData[test] = {}#defaultdict(float)
+        simData[test] = defaultdict(float)
 
         for book in testData[test].keys():
 
             #print("book ", book)
-            simData[test][book] = {}#defaultdict(float)
+            #simData[test][book] = {}#defaultdict(float)
 
             for user in bookRatingMap[book]:
 
                 if(user in trainingData):
 
                     #print("user ", user,  bookRatingMap[book][user])
-                    simData[test][book][user] = np.multiply(bookRatingMap[book][user], testData[test][book])#+=
+                    simData[test][user] += np.multiply(bookRatingMap[book][user], testData[test][book])#+=
 
                 else:
                    print("User not found ", user)
 
     CosineSimiarity(simData, trainingData, testData)
-    FindK(simData, userRatingMap, bookRatingMap, k)
+    FindK(simData, userRatingMap, bookRatingMap, testData, k)
     return simData
 
-def FindK(simData, userRatingMap, bookRatingMap, k):
+def FindK(simData, userRatingMap, bookRatingMap, testData, k):
 
-    for user in simData:
+    for user in testData:
 
-        for book in simData[user]:
-            print(book)
-            mostSimilars = Counter(simData[user][book]).most_common(k)
+        mostSimilars = Counter(simData[user]).most_common(k)
+        simData[user] = {}
+
+        for book in testData[user]:
+            #print(book)
+
             ratingSum = 0
 
             for simUser in mostSimilars:
-                ratingSum += userRatingMap[simUser[0]][book]
 
-                print(ratingSum)
+                if(book in userRatingMap[simUser[0]]):
+                    ratingSum += userRatingMap[simUser[0]][book]
+
+                #print(ratingSum)
 
             simData[user][book] = ratingSum / k
             simData[user][book] = userRatingMap[user][book] - simData[user][book]
-    print(simData)
+
+
+    #print(simData)
 
 
 def CosineSimiarity(simData, trainingData, testData):
@@ -88,19 +95,18 @@ def CosineSimiarity(simData, trainingData, testData):
 
         testNorm = np.array(list(testData[user].values()))
         testNorm = np.linalg.norm(testNorm)
-        for book in simData[user]:
 
-            for sim in simData[user][book]:
+        for sim in simData[user]:
 
-                simNorm = np.array(list(trainingData[sim].values()))
-                simNorm = np.linalg.norm(simNorm)
+            simNorm = np.array(list(trainingData[sim].values()))
+            simNorm = np.linalg.norm(simNorm)
 
-                if(simNorm != 0 and testNorm != 0):
-                    simData[user][book][sim] /= np.multiply(simNorm, testNorm)
-                else:
-                    simData[user][book][sim] = 0.0
+            if(simNorm != 0 and testNorm != 0):
+                simData[user][sim] /= np.multiply(simNorm, testNorm)
+            else:
+                simData[user][sim] = 0.0
 
-                #print(sim, simData[test][sim])
+            #print(sim, simData[test][sim])
 
 
 def AdjCosineSimilarity():
