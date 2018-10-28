@@ -57,14 +57,15 @@ def ValidateData(userRatingMap, bookRatingMap, function = "Cos", split = 1, k = 
                     #print("user ", user,  bookRatingMap[book][user])
                     simData[test][user] += np.multiply(bookRatingMap[book][user], testData[test][book])#+=
 
-                else:
-                   print("User not found ", user)
-
     CosineSimiarity(simData, trainingData, testData)
-    FindK(simData, userRatingMap, bookRatingMap, testData, k)
+
+    PredictRating(simData, userRatingMap, bookRatingMap, testData, k)
+
+    MAE(simData)
+
     return simData
 
-def FindK(simData, userRatingMap, bookRatingMap, testData, k):
+def PredictRating(simData, userRatingMap, bookRatingMap, testData, k):
 
     for user in testData:
 
@@ -79,16 +80,41 @@ def FindK(simData, userRatingMap, bookRatingMap, testData, k):
             for simUser in mostSimilars:
 
                 if(book in userRatingMap[simUser[0]]):
-                    ratingSum += userRatingMap[simUser[0]][book]
+
+                     ratingSum += userRatingMap[simUser[0]][book]
 
                 #print(ratingSum)
 
             simData[user][book] = ratingSum / k
-            simData[user][book] = userRatingMap[user][book] - simData[user][book]
+            simData[user][book] = simData[user][book] - userRatingMap[user][book]
 
 
     #print(simData)
 
+def MAE(simData):
+
+    temp = {}
+    errorCount = 0
+
+    for user in simData:
+
+        count = 0
+
+
+        for book in simData[user]:
+
+            count += math.fabs(simData[user][book])
+            errorCount += 1
+
+        if(len(simData[user]) != 0):
+
+            temp[user] = count / len(simData[user])
+        count = 0
+
+
+
+    #print(temp)
+    print("MAE = ", sum(temp.values()) / errorCount)
 
 def CosineSimiarity(simData, trainingData, testData):
     for user in simData:

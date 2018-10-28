@@ -23,10 +23,10 @@ print("matrix creation time: ", time.time() - timer)
 
 timer = time.time()
 
-sim = knn.ValidateData(userRatingMap, bookRatingMap, split=200, k=20)
+sim = knn.ValidateData(userRatingMap, bookRatingMap, split=3700, k=3)
 
 #print("sim dict: ", sim)
-print("knn time: ", time.time() - timer)
+print("Validation time: ", time.time() - timer)
 
 ##
 #TODO:1. Matrix oluştur, her satır bir user her stun bir kitap
