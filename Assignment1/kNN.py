@@ -39,30 +39,38 @@ def ValidateData(userRatingMap, bookRatingMap, function = "Cos", split = 1, k = 
     testData = {k: userRatingMap[k] for k in list(userRatingMap)[:split]}
 
     simData = {}
+    if(function == 'Cos'):
+        for test in testData:
 
-    for test in testData:
+            #print("test ", test, testData[test].keys(), testData[test].values())
+            simData[test] = defaultdict(float)
 
-        #print("test ", test, testData[test].keys(), testData[test].values())
-        simData[test] = defaultdict(float)
+            for book in testData[test].keys():
 
-        for book in testData[test].keys():
+                #print("book ", book)
+                #simData[test][book] = {}#defaultdict(float)
 
-            #print("book ", book)
-            #simData[test][book] = {}#defaultdict(float)
+                for user in bookRatingMap[book]:
 
-            for user in bookRatingMap[book]:
+                    if(user in trainingData):
 
-                if(user in trainingData):
+                        #print("user ", user,  bookRatingMap[book][user])
+                        simData[test][user] += np.multiply(bookRatingMap[book][user], testData[test][book])#+=
 
-                    #print("user ", user,  bookRatingMap[book][user])
-                    simData[test][user] += np.multiply(bookRatingMap[book][user], testData[test][book])#+=
+        CosineSimiarity(simData, trainingData, testData)
 
-    CosineSimiarity(simData, trainingData, testData)
+        PredictRating(simData, userRatingMap, bookRatingMap, testData, k, threshold)
 
-    PredictRating(simData, userRatingMap, bookRatingMap, testData, k, threshold)
+        MAE(simData)
 
-    MAE(simData)
+    elif(function == 'ACos'):
 
+        print((function))
+
+    elif(function == 'Cor'):
+
+        print(function)
+        
     return simData
 
 def PredictRating(simData, userRatingMap, bookRatingMap, testData, k, threshold):
