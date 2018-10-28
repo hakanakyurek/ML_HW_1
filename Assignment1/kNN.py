@@ -33,7 +33,7 @@ def ConstructTrainModel(filteredData):
 
     return userRatingMap, bookRatingMap
 
-def ValidateData(userRatingMap, bookRatingMap, function = "Cos", split = 1, k = 1):
+def ValidateData(userRatingMap, bookRatingMap, function = "Cos", split = 1, k = 1, threshold = 1):
 
     trainingData = {k: userRatingMap[k] for k in list(userRatingMap)[split:]}
     testData = {k: userRatingMap[k] for k in list(userRatingMap)[:split]}
@@ -59,13 +59,13 @@ def ValidateData(userRatingMap, bookRatingMap, function = "Cos", split = 1, k = 
 
     CosineSimiarity(simData, trainingData, testData)
 
-    PredictRating(simData, userRatingMap, bookRatingMap, testData, k)
+    PredictRating(simData, userRatingMap, bookRatingMap, testData, k, threshold)
 
     MAE(simData)
 
     return simData
 
-def PredictRating(simData, userRatingMap, bookRatingMap, testData, k):
+def PredictRating(simData, userRatingMap, bookRatingMap, testData, k, threshold):
 
     for user in testData:
 
@@ -77,16 +77,18 @@ def PredictRating(simData, userRatingMap, bookRatingMap, testData, k):
 
             ratingSum = 0
 
-            for simUser in mostSimilars:
+            if (len(bookRatingMap[book]) >= threshold):
 
-                if(book in userRatingMap[simUser[0]]):
+                for simUser in mostSimilars:
 
-                     ratingSum += userRatingMap[simUser[0]][book]
+                    if(book in userRatingMap[simUser[0]]):
 
-                #print(ratingSum)
+                         ratingSum += userRatingMap[simUser[0]][book]
 
-            simData[user][book] = ratingSum / k
-            simData[user][book] = simData[user][book] - userRatingMap[user][book]
+                    #print(ratingSum)
+
+                simData[user][book] = ratingSum / k
+                simData[user][book] = simData[user][book] - userRatingMap[user][book]
 
 
     #print(simData)
