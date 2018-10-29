@@ -150,7 +150,8 @@ def MAE(simData):
 
         if(len(simData[user]) != 0):
 
-            temp[user] = count / len(simData[user])
+            temp[user] = count
+
         count = 0
 
 
