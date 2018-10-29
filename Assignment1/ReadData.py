@@ -19,3 +19,10 @@ def PandaReader(ratings, users, books):
     filteredData = filteredData[['ISBN', 'User-ID', 'Book-Rating']]
 
     return filteredData
+
+def ReadTest(testcsv):
+
+    testData = pd.read_csv(testcsv, sep=';', encoding='latin-1', error_bad_lines=False, warn_bad_lines=False)
+    testData = testData[['ISBN', 'User-ID', 'Book-Rating']]
+
+    return testData
