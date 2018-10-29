@@ -33,7 +33,38 @@ def ConstructTrainModel(filteredData):
 
     return userRatingMap, bookRatingMap
 
-def ValidateData(userRatingMap, bookRatingMap, function = "Cos", split = 1, k = 1, threshold = 1):
+def TestData(userRatingMap, userRatingTestMap, bookRatingMap, function='Cos', k=1, threshold = 0):
+
+    trainingData = {k: userRatingMap[k] for k in list(userRatingMap)}
+    testData = {k: userRatingTestMap[k] for k in list(userRatingTestMap)}
+
+    simData = {}
+    if (function == 'Cos'):
+        for test in testData:
+
+            # print("test ", test, testData[test].keys(), testData[test].values())
+            simData[test] = defaultdict(float)
+
+            for book in testData[test].keys():
+
+                # print("book ", book)
+                # simData[test][book] = {}#defaultdict(float)
+
+                for user in bookRatingMap[book]:
+
+                    if (user in trainingData):
+                        # print("user ", user,  bookRatingMap[book][user])
+                        simData[test][user] += np.multiply(bookRatingMap[book][user], testData[test][book])  # +=
+
+        CosineSimiarity(simData, trainingData, testData)
+
+        PredictRating(simData, userRatingMap, bookRatingMap, testData, k, threshold)
+
+        MAE(simData)
+
+    return simData
+
+def ValidateData(userRatingMap, bookRatingMap, function = "Cos", split = 1, k = 1, threshold = 0):
 
     trainingData = {k: userRatingMap[k] for k in list(userRatingMap)[split:]}
     testData = {k: userRatingMap[k] for k in list(userRatingMap)[:split]}
@@ -70,11 +101,12 @@ def ValidateData(userRatingMap, bookRatingMap, function = "Cos", split = 1, k = 
     elif(function == 'Cor'):
 
         print(function)
+
         
     return simData
 
 def PredictRating(simData, userRatingMap, bookRatingMap, testData, k, threshold):
-
+    count = 0
     for user in testData:
 
         mostSimilars = Counter(simData[user]).most_common(k)
@@ -96,9 +128,9 @@ def PredictRating(simData, userRatingMap, bookRatingMap, testData, k, threshold)
                     #print(ratingSum)
 
                 simData[user][book] = ratingSum / k
-                simData[user][book] = simData[user][book] - userRatingMap[user][book]
-
-
+                simData[user][book] = simData[user][book] - testData[user][book]
+                count += 1
+    print("prediction number: ", count)
     #print(simData)
 
 def MAE(simData):
@@ -120,6 +152,9 @@ def MAE(simData):
 
             temp[user] = count / len(simData[user])
         count = 0
+
+
+
 
 
 
@@ -150,3 +185,6 @@ def AdjCosineSimilarity():
 
 def CorrolationSimilarity():
     print("empty")
+
+def Average(lst):
+    return sum(lst) / len(lst)
