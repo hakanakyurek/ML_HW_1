@@ -27,8 +27,8 @@ print("matrix creation time: ", time.time() - timer)
 
 timer = time.time()
 
-#sim = knn.ValidateData(userRatingMap, bookRatingMap, split=4000, k=3, function='Cos')
-sim = knn.TestData(userRatingMap, userRatingTestMap, bookRatingMap, k=3, function='Cos')
+sim = knn.ValidateData(userRatingMap, bookRatingMap, split=3000, k=5, function='Cos', threshold=24)
+#sim = knn.TestData(userRatingMap, userRatingTestMap, bookRatingMap, k=9, function='Cos', threshold=50, weighted=True)
 #print("sim dict: ", sim)
 print("Validation time: ", time.time() - timer)
 
