@@ -35,34 +35,78 @@ def ConstructTrainModel(filteredData):
     return userRatingMap, bookRatingMap
 
 
+def UseData(userRatingMap, testData, trainingData, bookRatingMap, function='Cos', k=1, threshold = 0, weighted = False):
+
+    simData = {}
+    corValue = {}
+    aCosValue = {}
+
+    for test in testData:
+
+        # print("test ", test, testData[test].keys(), testData[test].values())
+        simData[test] = defaultdict(float)
+        corValue[test] = [0, 0]
+
+        for book in testData[test].keys():
+
+            # print("book ", book)
+            # simData[test][book] = {}#defaultdict(float)
+
+            for user in bookRatingMap[book]:
+
+                if (user in trainingData):
+
+                    if (function == 'Cos'):
+                        # print("user ", user,  bookRatingMap[book][user])
+                        simData[test][user] += np.multiply(bookRatingMap[book][user], testData[test][book])  # +=
+
+                    elif (function == 'Cor'):
+                        testavg = Average(testData[test].values())
+                        usravg = Average(trainingData[user].values())
+
+                        x = testData[test][book] - testavg
+                        y = bookRatingMap[book][user] - usravg
+
+                        corValue[test] = [corValue[test][0] + (x ** 2), corValue[test][1] + (y ** 2)]
+
+                        # print("user ", user,  bookRatingMap[book][user])
+                        simData[test][user] += x * y
+
+                    elif (function == 'ACos'):
+                        bookavg = Average(bookRatingMap[book].values())
+
+                        x = testData[test][book] - bookavg
+                        y = bookRatingMap[book][user] - bookavg
+
+                        # print("user ", user,  bookRatingMap[book][user])
+                        simData[test][user] += x * y
+
+
+    if (function == 'Cos'):
+
+        CosineSimiarity(simData, trainingData, testData)
+
+    elif (function == 'Cor'):
+
+        CorrolationSimilarity(simData, trainingData, testData, corValue)
+
+    elif (function == 'ACos'):
+
+        AdjCosineSimilarity(simData, trainingData, testData, aCosValue)
+
+    PredictRating(simData, userRatingMap, bookRatingMap, testData, k, threshold, weighted)
+
+    MAE(simData)
+
+    return simData
+
+
 def TestData(userRatingMap, userRatingTestMap, bookRatingMap, function='Cos', k=1, threshold = 0, weighted = False):
 
     trainingData = {k: userRatingMap[k] for k in list(userRatingMap)}
     testData = {k: userRatingTestMap[k] for k in list(userRatingTestMap)}
 
-    simData = {}
-    if (function == 'Cos'):
-        for test in testData:
-
-            # print("test ", test, testData[test].keys(), testData[test].values())
-            simData[test] = defaultdict(float)
-
-            for book in testData[test].keys():
-
-                # print("book ", book)
-                # simData[test][book] = {}#defaultdict(float)
-
-                for user in bookRatingMap[book]:
-
-                    if (user in trainingData):
-                        # print("user ", user,  bookRatingMap[book][user])
-                        simData[test][user] += np.multiply(bookRatingMap[book][user], testData[test][book])  # +=
-
-        CosineSimiarity(simData, trainingData, testData)
-
-        PredictRating(simData, userRatingMap, bookRatingMap, testData, k, threshold, weighted)
-
-        MAE(simData)
+    simData = UseData(userRatingMap, testData, trainingData, bookRatingMap, function, k, threshold, weighted)
 
     return simData
 
@@ -72,67 +116,7 @@ def ValidateData(userRatingMap, bookRatingMap, function = "Cos", split = 1, k = 
     trainingData = {k: userRatingMap[k] for k in list(userRatingMap)[split:]}
     testData = {k: userRatingMap[k] for k in list(userRatingMap)[:split]}
 
-    simData = {}
-    corValue = {}
-    aCosValue = {}
-
-    for test in testData:
-
-        #print("test ", test, testData[test].keys(), testData[test].values())
-        simData[test] = defaultdict(float)
-        aCosValue[test] = {}
-
-        for book in testData[test].keys():
-
-            #print("book ", book)
-            #simData[test][book] = {}#defaultdict(float)
-
-            for user in bookRatingMap[book]:
-
-                if(user in trainingData):
-
-                    if (function == 'Cos'):
-                        #print("user ", user,  bookRatingMap[book][user])
-                        simData[test][user] += np.multiply(bookRatingMap[book][user], testData[test][book])#+=
-
-                    elif (function == 'Cor'):
-                        bookavg = Average(bookRatingMap[book].values())
-
-                        x = testData[test][book] - bookavg
-                        y = bookRatingMap[book][user] - bookavg
-
-                        #print("user ", user,  bookRatingMap[book][user])
-                        simData[test][user] += x * y
-
-                    elif (function == 'ACos'):
-                        testavg = Average(testData[test].values())
-                        usravg = Average(trainingData[user].values())
-
-                        x = testData[test][book] - testavg
-                        y = bookRatingMap[book][user] - usravg
-
-
-                        aCosValue[test][user] = [x, y]
-
-                        #print("user ", user,  bookRatingMap[book][user])
-                        simData[test][user] += x * y
-
-
-    if(function == 'Cos'):
-
-        CosineSimiarity(simData, trainingData, testData)
-
-    elif (function == 'Cor'):
-
-        CorrolationSimilarity(simData, trainingData, testData)
-
-    elif (function == 'ACos'):
-
-        AdjCosineSimilarity(simData, trainingData, testData, aCosValue)
-
-    PredictRating(simData, userRatingMap, bookRatingMap, testData, k, threshold, weighted)
-
-    MAE(simData)
+    simData = UseData(userRatingMap, testData, trainingData, bookRatingMap, function, k, threshold, weighted)
 
     return simData
 
@@ -176,6 +160,7 @@ def PredictRating(simData, userRatingMap, bookRatingMap, testData, k, threshold,
                 count += 1
     print("prediction number: ", count)
     #print(simData)
+
 
 def MAE(simData):
 
@@ -222,21 +207,20 @@ def CosineSimiarity(simData, trainingData, testData):
 
 
 def AdjCosineSimilarity(simData, trainingData, testData, aCosValue):
+    print("empty")
+
+def CorrolationSimilarity(simData, trainingData, testData, corValue):
 
     for user in simData:
 
-        val1, val2 = 0, 0
+        corValue[user] = [math.sqrt(corValue[user][0]), math.sqrt(corValue[user][1])]
 
         for sim in simData[user]:
 
-            val1 += aCosValue[user][sim][0] * aCosValue[user][sim][0]
-            val2 += aCosValue[user][sim][1] * aCosValue[user][sim][1]
-
-            simData[user][sim] = math.sqrt(val1) * math.sqrt(val2)
-
-
-def CorrolationSimilarity(simData, trainingData, testData):
-    print("empty")
+            if(corValue[user].count(0) == 0):
+                simData[user][sim] /= corValue[user][0] * corValue[user][1]
+            else:
+                simData[user][sim] = 0.0
 
 
 def Average(lst):
