@@ -9,11 +9,9 @@ import threading
 dataSplit = 4000/12779
 timer = time.time()
 
-testRatings = r.ReadTest("/home/hakanmint/Desktop/oKuL/409/ASSignment 1/Assignment1/data/Test-User_Rating0.csv")
+testRatings = r.ReadTest("./data/Test-User_Rating0.csv")
 
-ratings = r.PandaReader("/home/hakanmint/Desktop/oKuL/409/ASSignment 1/Assignment1/data/BX-Book-Ratings-Train.csv",
-                        "/home/hakanmint/Desktop/oKuL/409/ASSignment 1/Assignment1/data/BX-Users.csv",
-                        "/home/hakanmint/Desktop/oKuL/409/ASSignment 1/Assignment1/data/BX-Books.csv")
+ratings = r.PandaReader("./data/BX-Book-Ratings-Train.csv", "./data/BX-Users.csv", "./data/BX-Books.csv")
 
 
 print("Read data time: ", time.time() - timer)
@@ -27,8 +25,8 @@ print("matrix creation time: ", time.time() - timer)
 
 timer = time.time()
 
-sim = knn.ValidateData(userRatingMap, bookRatingMap, split=3000, k=5, function='Cos', threshold=24)
-#sim = knn.TestData(userRatingMap, userRatingTestMap, bookRatingMap, k=9, function='Cos', threshold=50, weighted=True)
+#sim = knn.ValidateData(userRatingMap, bookRatingMap, split=2, k=3, function='Cos', threshold=1, weighted=True)
+sim = knn.TestData(userRatingMap, userRatingTestMap, bookRatingMap, k=9, function='Cos', threshold=50, weighted=True)
 #print("sim dict: ", sim)
 print("Validation time: ", time.time() - timer)
 
