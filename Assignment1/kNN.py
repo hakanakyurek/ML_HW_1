@@ -164,12 +164,15 @@ def PredictRating(simData, userRatingMap, bookRatingMap, testData, k, threshold,
 
                         else:
 
-                            ratingSum += userRatingMap[simUser[0]][book] * 1.72 * tempsimData[user][simUser[0]]
+                            ratingSum += userRatingMap[simUser[0]][book] * (1 / ((1 - tempsimData[user][simUser[0]]) ** 2 + 0.001))
 
                     #print(ratingSum)
 
                 simData[user][book] = ratingSum / k
-                simData[user][book] = simData[user][book] - testData[user][book]
+                prediction = simData[user][book]
+                prediction = 10 if prediction > 10 else prediction
+
+                simData[user][book] = prediction - testData[user][book]
                 count += 1
     print("prediction number: ", count)
     #print(simData)
