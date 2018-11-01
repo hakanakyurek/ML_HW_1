@@ -38,14 +38,13 @@ def ConstructTrainModel(filteredData):
 def UseData(userRatingMap, testData, trainingData, bookRatingMap, function='Cos', k=1, threshold = 0, weighted = False):
 
     simData = {}
-    corValue = {}
-    aCosValue = {}
+    values = {}
 
     for test in testData:
 
         # print("test ", test, testData[test].keys(), testData[test].values())
         simData[test] = defaultdict(float)
-        corValue[test] = [0, 0]
+        values[test] = [0, 0]
 
         for book in testData[test].keys():
 
@@ -60,23 +59,25 @@ def UseData(userRatingMap, testData, trainingData, bookRatingMap, function='Cos'
                         # print("user ", user,  bookRatingMap[book][user])
                         simData[test][user] += np.multiply(bookRatingMap[book][user], testData[test][book])  # +=
 
-                    elif (function == 'Cor'):
+                    elif (function == 'Cor'):#kitap
+                        bookavg = Average(bookRatingMap[book].values())
+
+                        x = testData[test][book] - bookavg
+                        y = bookRatingMap[book][user] - bookavg
+
+                        values[test] = [values[test][0] + (x ** 2), values[test][1] + (y ** 2)]
+                        # print("user ", user,  bookRatingMap[book][user])
+                        simData[test][user] += x * y
+
+                    elif (function == 'ACos'):#user
+                        #TODO: ortak kitaplara verilen oyların ortalaması alınacak
                         testavg = Average(testData[test].values())
                         usravg = Average(trainingData[user].values())
 
                         x = testData[test][book] - testavg
                         y = bookRatingMap[book][user] - usravg
 
-                        corValue[test] = [corValue[test][0] + (x ** 2), corValue[test][1] + (y ** 2)]
-
-                        # print("user ", user,  bookRatingMap[book][user])
-                        simData[test][user] += x * y
-
-                    elif (function == 'ACos'):
-                        bookavg = Average(bookRatingMap[book].values())
-
-                        x = testData[test][book] - bookavg
-                        y = bookRatingMap[book][user] - bookavg
+                        values[test] = [values[test][0] + (x ** 2), values[test][1] + (y ** 2)]
 
                         # print("user ", user,  bookRatingMap[book][user])
                         simData[test][user] += x * y
@@ -86,13 +87,9 @@ def UseData(userRatingMap, testData, trainingData, bookRatingMap, function='Cos'
 
         CosineSimiarity(simData, trainingData, testData)
 
-    elif (function == 'Cor'):
+    else:
 
-        CorrolationSimilarity(simData, trainingData, testData, corValue)
-
-    elif (function == 'ACos'):
-
-        AdjCosineSimilarity(simData, trainingData, testData, aCosValue)
+        COR_ACOS_Similarity(simData, trainingData, testData, values)
 
     PredictRating(simData, userRatingMap, bookRatingMap, testData, k, threshold, weighted)
 
@@ -206,19 +203,15 @@ def CosineSimiarity(simData, trainingData, testData):
             #print(sim, simData[test][sim])
 
 
-def AdjCosineSimilarity(simData, trainingData, testData, aCosValue):
-    print("empty")
-
-def CorrolationSimilarity(simData, trainingData, testData, corValue):
-
+def COR_ACOS_Similarity(simData, trainingData, testData, values):
     for user in simData:
 
-        corValue[user] = [math.sqrt(corValue[user][0]), math.sqrt(corValue[user][1])]
+        values[user] = [math.sqrt(values[user][0]), math.sqrt(values[user][1])]
 
         for sim in simData[user]:
 
-            if(corValue[user].count(0) == 0):
-                simData[user][sim] /= corValue[user][0] * corValue[user][1]
+            if(values[user].count(0) == 0):
+                simData[user][sim] /= (values[user][0] * values[user][1])
             else:
                 simData[user][sim] = 0.0
 
