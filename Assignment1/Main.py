@@ -3,10 +3,7 @@ from sklearn import neighbors
 import ReadData as r
 import kNN as knn
 import time
-import threading
 
-
-dataSplit = 4000/12779
 timer = time.time()
 
 testRatings = r.ReadTest("./data/Test-User_Rating0.csv")
@@ -25,8 +22,15 @@ print("matrix creation time: ", time.time() - timer)
 
 timer = time.time()
 
-#sim = knn.ValidateData(userRatingMap, bookRatingMap, split=2, k=3, function='Cos', threshold=1, weighted=True)
-sim = knn.TestData(userRatingMap, userRatingTestMap, bookRatingMap, k=9, function='Cos', threshold=50, weighted=True)
+function = 'ACos'
+f = open("knn" + function + "txt", "a")
+
+#sim = knn.ValidateData(userRatingMap, bookRatingMap, split=2000, k=3, function=function, threshold=5, weighted=False)
+for k in range(1, 50, 2):
+    timer = time.time()
+    print("K = ", k)
+    sim = knn.TestData(userRatingMap, userRatingTestMap, bookRatingMap, k=k, function=function, threshold=50, weighted=True)
+    print("Test k time: ", time.time() - timer)
 #print("sim dict: ", sim)
 print("Validation time: ", time.time() - timer)
 

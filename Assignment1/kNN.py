@@ -42,22 +42,19 @@ def UseData(userRatingMap, testData, trainingData, bookRatingMap, function='Cos'
 
     for test in testData:
 
-        # print("test ", test, testData[test].keys(), testData[test].values())
         simData[test] = defaultdict(float)
         values[test] = [0, 0]
 
         for book in testData[test].keys():
 
-            # print("book ", book)
-            # simData[test][book] = {}#defaultdict(float)
 
             for user in bookRatingMap[book]:
 
                 if (user in trainingData):
 
                     if (function == 'Cos'):
-                        # print("user ", user,  bookRatingMap[book][user])
-                        simData[test][user] += np.multiply(bookRatingMap[book][user], testData[test][book])  # +=
+
+                        simData[test][user] += np.multiply(bookRatingMap[book][user], testData[test][book])
 
                     elif (function == 'Cor'):#kitap
                         bookavg = Average(bookRatingMap[book].values())
@@ -66,7 +63,7 @@ def UseData(userRatingMap, testData, trainingData, bookRatingMap, function='Cos'
                         y = bookRatingMap[book][user] - bookavg
 
                         values[test] = [values[test][0] + (x ** 2), values[test][1] + (y ** 2)]
-                        # print("user ", user,  bookRatingMap[book][user])
+
                         simData[test][user] += x * y
 
                     elif (function == 'ACos'):#user
@@ -79,9 +76,7 @@ def UseData(userRatingMap, testData, trainingData, bookRatingMap, function='Cos'
 
                         values[test] = [values[test][0] + (x ** 2), values[test][1] + (y ** 2)]
 
-                        # print("user ", user,  bookRatingMap[book][user])
                         simData[test][user] += x * y
-
 
     if (function == 'Cos'):
 
@@ -93,9 +88,9 @@ def UseData(userRatingMap, testData, trainingData, bookRatingMap, function='Cos'
 
     PredictRating(simData, userRatingMap, bookRatingMap, testData, k, threshold, weighted)
 
-    MAE(simData)
+    mae = MAE(simData)
 
-    return simData
+    return simData, mae
 
 
 def TestData(userRatingMap, userRatingTestMap, bookRatingMap, function='Cos', k=1, threshold = 0, weighted = False):
@@ -103,9 +98,9 @@ def TestData(userRatingMap, userRatingTestMap, bookRatingMap, function='Cos', k=
     trainingData = {k: userRatingMap[k] for k in list(userRatingMap)}
     testData = {k: userRatingTestMap[k] for k in list(userRatingTestMap)}
 
-    simData = UseData(userRatingMap, testData, trainingData, bookRatingMap, function, k, threshold, weighted)
+    simData, mae = UseData(userRatingMap, testData, trainingData, bookRatingMap, function, k, threshold, weighted)
 
-    return simData
+    return simData, mae
 
 
 def ValidateData(userRatingMap, bookRatingMap, function = "Cos", split = 1, k = 1, threshold = 0, weighted = False):
@@ -113,9 +108,9 @@ def ValidateData(userRatingMap, bookRatingMap, function = "Cos", split = 1, k = 
     trainingData = {k: userRatingMap[k] for k in list(userRatingMap)[split:]}
     testData = {k: userRatingMap[k] for k in list(userRatingMap)[:split]}
 
-    simData = UseData(userRatingMap, testData, trainingData, bookRatingMap, function, k, threshold, weighted)
+    simData, mae = UseData(userRatingMap, testData, trainingData, bookRatingMap, function, k, threshold, weighted)
 
-    return simData
+    return simData, mae
 
 
 def PredictRating(simData, userRatingMap, bookRatingMap, testData, k, threshold, weighted = False):
@@ -129,8 +124,6 @@ def PredictRating(simData, userRatingMap, bookRatingMap, testData, k, threshold,
         simData[user] = {}
 
         for book in testData[user]:
-            #print(book)
-
             ratingSum = 0
 
             if (len(bookRatingMap[book]) >= threshold):
@@ -147,8 +140,6 @@ def PredictRating(simData, userRatingMap, bookRatingMap, testData, k, threshold,
 
                             ratingSum += userRatingMap[simUser[0]][book] * (1 / ((1 - tempsimData[user][simUser[0]]) ** 2 + 0.001))
 
-                    #print(ratingSum)
-
                 simData[user][book] = ratingSum / k
                 prediction = simData[user][book]
                 prediction = 10 if prediction > 10 else prediction
@@ -156,7 +147,6 @@ def PredictRating(simData, userRatingMap, bookRatingMap, testData, k, threshold,
                 simData[user][book] = prediction - testData[user][book]
                 count += 1
     print("prediction number: ", count)
-    #print(simData)
 
 
 def MAE(simData):
@@ -167,7 +157,6 @@ def MAE(simData):
     for user in simData:
 
         count = 0
-
 
         for book in simData[user]:
 
@@ -180,11 +169,14 @@ def MAE(simData):
 
         count = 0
 
+    mae = sum(temp.values()) / errorCount
     #print(temp)
-    print("MAE = ", sum(temp.values()) / errorCount)
+    print("MAE = ", mae)
+    return mae
 
 
 def CosineSimiarity(simData, trainingData, testData):
+
     for user in simData:
 
         testNorm = np.array(list(testData[user].values()))
@@ -199,8 +191,6 @@ def CosineSimiarity(simData, trainingData, testData):
                 simData[user][sim] /= np.multiply(simNorm, testNorm)
             else:
                 simData[user][sim] = 0.0
-
-            #print(sim, simData[test][sim])
 
 
 def COR_ACOS_Similarity(simData, trainingData, testData, values):
