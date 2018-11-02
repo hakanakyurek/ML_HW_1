@@ -22,21 +22,27 @@ print("matrix creation time: ", time.time() - timer)
 
 timer = time.time()
 
-function = 'ACos'
+function = 'Cor'
 f = open("knn" + function + "txt", "a")
 
-#sim = knn.ValidateData(userRatingMap, bookRatingMap, split=2000, k=3, function=function, threshold=5, weighted=False)
+min = [1000, 0]
+
 for k in range(1, 50, 2):
     timer = time.time()
     print("K = ", k)
-    sim = knn.TestData(userRatingMap, userRatingTestMap, bookRatingMap, k=k, function=function, threshold=50, weighted=True)
+    sim, mae = knn.ValidateData(userRatingMap, bookRatingMap, split=3000, k=k, function=function, threshold=8, weighted=False)
+    if mae < min[0]:
+        min[0] = mae
+        min[1] = k
+
+    print("Test k time: ", time.time() - timer)
+    print(min)
+'''
+for k in range(1, 50, 2):
+    timer = time.time()
+    print("K = ", k)
+    sim = knn.TestData(userRatingMap, userRatingTestMap, bookRatingMap, k=k, function=function, threshold=0, weighted=False)
     print("Test k time: ", time.time() - timer)
 #print("sim dict: ", sim)
+'''
 print("Validation time: ", time.time() - timer)
-
-##
-#TODO:1. Matrix oluştur, her satır bir user her stun bir kitap
-#TODO:2. Satırlar arasında similarity bul.
-#TODO:3. Verilen dataya en yakın k elemanı bul(similarity)
-#
-##
