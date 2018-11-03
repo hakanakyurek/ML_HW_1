@@ -108,10 +108,10 @@ def TestData(userRatingMap, userRatingTestMap, bookRatingMap, function='Cos', k=
     return simData, mae
 
 
-def ValidateData(userRatingMap, bookRatingMap, function = "Cos", split = 1, k = 1, threshold = 0, weighted = False):
+def ValidateData(userRatingMap, bookRatingMap, function = "Cos", split_1 = 1, split_2 = 1, k = 1, threshold = 0, weighted = False):
 
-    trainingData = {k: userRatingMap[k] for k in list(userRatingMap)[split:]}
-    testData = {k: userRatingMap[k] for k in list(userRatingMap)[:split]}
+    trainingData = {k: userRatingMap[k] for k in list(userRatingMap)[split_2:] + list(userRatingMap)[:split_1]}
+    testData = {k: userRatingMap[k] for k in list(userRatingMap)[split_1:split_2]}
 
     simData, mae = UseData(userRatingMap, testData, trainingData, bookRatingMap, function, k, threshold, weighted)
 

@@ -6,7 +6,7 @@ import time
 
 timer = time.time()
 
-testRatings = r.ReadTest("./data/Test-User_Rating0.csv")
+testRatings = r.ReadTest("./data/BXBookRatingsTest.csv")
 
 ratings = r.PandaReader("./data/BX-Book-Ratings-Train.csv", "./data/BX-Users.csv", "./data/BX-Books.csv")
 
@@ -26,17 +26,20 @@ function = 'Cor'
 f = open("knn" + function + "txt", "a")
 
 min = [1000, 0]
+for split in range(0, 5):
+    print("split = ", split)
+    for k in range(1, 50, 2):
+        timer = time.time()
+        print("K = ", k)
+        sim, mae = knn.ValidateData(userRatingMap, bookRatingMap,
+                                    split_1=split * int(len(userRatingMap) / 5), split_2=(split + 1) * int(len(userRatingMap) / 5),
+                                    k=k, function=function, threshold=8, weighted=False)
+        if mae < min[0]:
+            min[0] = mae
+            min[1] = k
 
-for k in range(1, 50, 2):
-    timer = time.time()
-    print("K = ", k)
-    sim, mae = knn.ValidateData(userRatingMap, bookRatingMap, split=3000, k=k, function=function, threshold=8, weighted=False)
-    if mae < min[0]:
-        min[0] = mae
-        min[1] = k
-
-    print("Test k time: ", time.time() - timer)
-    print(min)
+        print("Test k time: ", time.time() - timer)
+        print(min)
 '''
 for k in range(1, 50, 2):
     timer = time.time()
@@ -45,4 +48,5 @@ for k in range(1, 50, 2):
     print("Test k time: ", time.time() - timer)
 #print("sim dict: ", sim)
 '''
+#sim = knn.TestData(userRatingMap, userRatingTestMap, bookRatingMap, k=5, function=function, threshold=8, weighted=False)
 print("Validation time: ", time.time() - timer)
