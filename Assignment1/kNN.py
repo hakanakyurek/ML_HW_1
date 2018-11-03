@@ -7,6 +7,7 @@ from pympler import asizeof
 import pandas as pd
 import math
 from collections import defaultdict
+import random
 
 
 def ConstructTrainModel(filteredData):
@@ -22,7 +23,10 @@ def ConstructTrainModel(filteredData):
 
         user = users[x]
         book = books[x]
-        rating = ratings[x]
+        try:
+            rating = int(ratings[x])
+        except ValueError:
+            continue
 
         if user not in userRatingMap:
             userRatingMap[user] = {}
@@ -47,36 +51,37 @@ def UseData(userRatingMap, testData, trainingData, bookRatingMap, function='Cos'
 
         for book in testData[test].keys():
 
+            if(book in bookRatingMap):
 
-            for user in bookRatingMap[book]:
+                for user in bookRatingMap[book]:
 
-                if (user in trainingData):
+                    if (user in trainingData):
 
-                    if (function == 'Cos'):
+                        if (function == 'Cos'):
 
-                        simData[test][user] += np.multiply(bookRatingMap[book][user], testData[test][book])
+                            simData[test][user] += np.multiply(bookRatingMap[book][user], testData[test][book])
 
-                    elif (function == 'Cor'):#kitap
-                        bookavg = Average(bookRatingMap[book].values())
+                        elif (function == 'Cor'):#kitap
+                            bookavg = Average(bookRatingMap[book].values())
 
-                        x = testData[test][book] - bookavg
-                        y = bookRatingMap[book][user] - bookavg
+                            x = testData[test][book] - bookavg
+                            y = bookRatingMap[book][user] - bookavg
 
-                        values[test] = [values[test][0] + (x ** 2), values[test][1] + (y ** 2)]
+                            values[test] = [values[test][0] + (x ** 2), values[test][1] + (y ** 2)]
 
-                        simData[test][user] += x * y
+                            simData[test][user] += x * y
 
-                    elif (function == 'ACos'):#user
-                        #TODO: ortak kitaplara verilen oyların ortalaması alınacak
-                        testavg = Average(testData[test].values())
-                        usravg = Average(trainingData[user].values())
+                        elif (function == 'ACos'):#user
+                            #TODO: ortak kitaplara verilen oyların ortalaması alınacak
+                            testavg = Average(testData[test].values())
+                            usravg = Average(trainingData[user].values())
 
-                        x = testData[test][book] - testavg
-                        y = bookRatingMap[book][user] - usravg
+                            x = testData[test][book] - testavg
+                            y = bookRatingMap[book][user] - usravg
 
-                        values[test] = [values[test][0] + (x ** 2), values[test][1] + (y ** 2)]
+                            values[test] = [values[test][0] + (x ** 2), values[test][1] + (y ** 2)]
 
-                        simData[test][user] += x * y
+                            simData[test][user] += x * y
 
     if (function == 'Cos'):
 
@@ -126,33 +131,35 @@ def PredictRating(simData, userRatingMap, bookRatingMap, testData, k, threshold,
         for book in testData[user]:
             ratingSum = 0
 
-            if (len(bookRatingMap[book]) >= threshold):
+            if(book in bookRatingMap):
 
-                for simUser in mostSimilars:
+                if (len(bookRatingMap[book]) >= threshold):
 
-                    if(book in userRatingMap[simUser[0]]):
+                    for simUser in mostSimilars:
 
-                        if not weighted:
+                        if(book in userRatingMap[simUser[0]]):
 
-                            ratingSum += userRatingMap[simUser[0]][book]
+                            if not weighted:
 
-                        else:
+                                ratingSum += userRatingMap[simUser[0]][book]
 
-                            ratingSum += userRatingMap[simUser[0]][book] * (1 / ((1 - tempsimData[user][simUser[0]]) ** 2 + 0.001))
+                            else:
+
+                                ratingSum += userRatingMap[simUser[0]][book] * (1 / ((1 - tempsimData[user][simUser[0]]) ** 2 + 0.001))
 
 
-                simData[user][book] = ratingSum / k
+                    simData[user][book] = ratingSum / k
 
-                prediction = simData[user][book]
-                prediction = 10 if prediction > 10 else prediction
+                    prediction = simData[user][book]
+                    prediction = 10 if prediction > 10 else prediction
 
-                simData[user][book] = prediction - testData[user][book]
-                count += 1
+                    simData[user][book] = prediction - testData[user][book]
+                    count += 1
 
-            else:
+                else:
 
-                simData[user][book] = testData[user][book] - Average(bookRatingMap[book].values())
-                count += 1
+                    simData[user][book] = testData[user][book] - Average(bookRatingMap[book].values())
+                    count += 1
     print("prediction number: ", count)
 
 
