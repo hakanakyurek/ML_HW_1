@@ -6,8 +6,11 @@ from numpy.linalg import norm
 from pympler import asizeof
 import pandas as pd
 import math
-from collections import defaultdict
 import random
+import time
+from collections import defaultdict
+
+errorNumber = 0
 
 
 def ConstructTrainModel(filteredData):
@@ -41,8 +44,13 @@ def ConstructTrainModel(filteredData):
 
 def UseData(userRatingMap, testData, trainingData, bookRatingMap, function='Cos', k=1, threshold = 0, weighted = False):
 
-    simData = {}
-    values = {}
+    simData = {} # holds similarities then errors.
+    values = {} # holds x and y values in cor-based and adj-cos-based similarities.
+
+    # To hold averages in order to avoid recalculating.
+    userAvgDict = {}
+    bookAvgDict = {}
+    testUserAvgDict = {}
 
     for test in testData:
 
@@ -51,34 +59,48 @@ def UseData(userRatingMap, testData, trainingData, bookRatingMap, function='Cos'
 
         for book in testData[test].keys():
 
+            # if we do not have any info on that book, no one will be similar over to test user because of it.
             if(book in bookRatingMap):
 
                 for user in bookRatingMap[book]:
 
+                    # if the user read the book is in training data, just in case.
                     if (user in trainingData):
 
                         if (function == 'Cos'):
 
                             simData[test][user] += np.multiply(bookRatingMap[book][user], testData[test][book])
 
-                        elif (function == 'Cor'):#kitap
-                            bookavg = Average(bookRatingMap[book].values())
+                        elif (function == 'Cor'):
+
+                            if(book not in bookAvgDict):
+                                bookavg = Average(bookRatingMap[book].values())
+                                bookAvgDict[book] = bookavg
+
+                            bookavg = bookAvgDict[book]
 
                             x = testData[test][book] - bookavg
                             y = bookRatingMap[book][user] - bookavg
 
+                            # calculate sums inside square roots.
                             values[test] = [values[test][0] + (x ** 2), values[test][1] + (y ** 2)]
 
                             simData[test][user] += x * y
 
-                        elif (function == 'ACos'):#user
-                            #TODO: ortak kitaplara verilen oyların ortalaması alınacak
-                            testavg = Average(testData[test].values())
-                            usravg = Average(trainingData[user].values())
+                        elif (function == 'ACos'):
 
-                            x = testData[test][book] - testavg
-                            y = bookRatingMap[book][user] - usravg
+                            if(test not in testUserAvgDict):
+                                testavg = Average(testData[test].values())
+                                testUserAvgDict[test] = testavg
 
+                            if(user not in userAvgDict):
+                                usravg = Average(trainingData[user].values())
+                                userAvgDict[user] = usravg
+
+                            x = testData[test][book] - testUserAvgDict[test]
+                            y = bookRatingMap[book][user] - userAvgDict[user]
+
+                            # calculate sums inside square roots.
                             values[test] = [values[test][0] + (x ** 2), values[test][1] + (y ** 2)]
 
                             simData[test][user] += x * y
@@ -127,6 +149,7 @@ def PredictRating(simData, userRatingMap, bookRatingMap, testData, k, threshold,
 
         mostSimilars = Counter(simData[user]).most_common(k)
         simData[user] = {}
+        avgUser = Average(testData[user].values())
 
         for book in testData[user]:
             ratingSum = 0
@@ -147,19 +170,22 @@ def PredictRating(simData, userRatingMap, bookRatingMap, testData, k, threshold,
 
                                 ratingSum += userRatingMap[simUser[0]][book] * (1 / ((1 - tempsimData[user][simUser[0]]) ** 2 + 0.001))
 
-
-                    simData[user][book] = ratingSum / k
-
-                    prediction = simData[user][book]
+                    prediction = ratingSum / k
                     prediction = 10 if prediction > 10 else prediction
 
                     simData[user][book] = prediction - testData[user][book]
                     count += 1
 
-                else:
+                else: # in case book cannot pass threshold
 
                     simData[user][book] = testData[user][book] - Average(bookRatingMap[book].values())
                     count += 1
+            else: # in case book is not recorded in training data
+                simData[user][book] = testData[user][book] - avgUser
+                count += 1
+
+    global errorNumber
+    errorNumber = count
     print("prediction number: ", count)
 
 
@@ -191,6 +217,8 @@ def MAE(simData):
 
 def CosineSimiarity(simData, trainingData, testData):
 
+    simNormDict = {}
+
     for user in simData:
 
         testNorm = np.array(list(testData[user].values()))
@@ -198,8 +226,12 @@ def CosineSimiarity(simData, trainingData, testData):
 
         for sim in simData[user]:
 
-            simNorm = np.array(list(trainingData[sim].values()))
-            simNorm = np.linalg.norm(simNorm)
+            if(sim not in simNormDict):
+                simNorm = np.array(list(trainingData[sim].values()))
+                simNorm = np.linalg.norm(simNorm)
+                simNormDict[sim] = simNorm
+
+            simNorm = simNormDict[sim]
 
             if(simNorm != 0 and testNorm != 0):
                 simData[user][sim] /= np.multiply(simNorm, testNorm)

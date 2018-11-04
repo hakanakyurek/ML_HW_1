@@ -6,10 +6,9 @@ import time
 
 timer = time.time()
 
-testRatings = r.ReadTest("./data/BXBookRatingsTest.csv")
+ratings, users, books = r.PandaReader("./data/BX-Book-Ratings-Train.csv", "./data/BX-Users.csv", "./data/BX-Books.csv")
 
-ratings = r.PandaReader("./data/BX-Book-Ratings-Train.csv", "./data/BX-Users.csv", "./data/BX-Books.csv")
-
+testRatings = r.ReadTest("./data/BXBookRatingsTest.csv", users, books)
 
 print("Read data time: ", time.time() - timer)
 
@@ -23,30 +22,34 @@ print("matrix creation time: ", time.time() - timer)
 timer = time.time()
 
 function = 'Cor'
-f = open("knn" + function + "txt", "a")
 
-min = [1000, 0]
-for split in range(0, 5):
-    print("split = ", split)
-    for k in range(1, 50, 2):
+'''
+f = open("knn" + function + "txt", "w")
+f.write("k" + " threshold" + " mae" + " time" + "\n")
+
+min = [0, 0]
+
+for k in range(1, 50, 2):
+    print("K = ", k)
+
+    for split in range(0, 5):
+        print("split = ", split)
         timer = time.time()
-        print("K = ", k)
+
         sim, mae = knn.ValidateData(userRatingMap, bookRatingMap,
                                     split_1=split * int(len(userRatingMap) / 5), split_2=(split + 1) * int(len(userRatingMap) / 5),
                                     k=k, function=function, threshold=8, weighted=False)
-        if mae < min[0]:
-            min[0] = mae
-            min[1] = k
+        min[0] += mae
+        min[1] += time.time() - timer
 
         print("Test k time: ", time.time() - timer)
-        print(min)
+
+    min[0] /= 5
+    min[1] /= 5
+    f.write("%d %d %.2f %.2f %d\n" % (k, 8, min[0], min[1], 0))
+    min[0] = min[1] = 0
+    
 '''
-for k in range(1, 50, 2):
-    timer = time.time()
-    print("K = ", k)
-    sim = knn.TestData(userRatingMap, userRatingTestMap, bookRatingMap, k=k, function=function, threshold=0, weighted=False)
-    print("Test k time: ", time.time() - timer)
-#print("sim dict: ", sim)
-'''
-#sim = knn.TestData(userRatingMap, userRatingTestMap, bookRatingMap, k=5, function=function, threshold=8, weighted=False)
+sim, mae = knn.TestData(userRatingMap, userRatingTestMap, bookRatingMap, k=3, function=function, threshold=0,
+                            weighted=False)
 print("Validation time: ", time.time() - timer)

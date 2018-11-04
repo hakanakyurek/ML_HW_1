@@ -17,12 +17,17 @@ def PandaReader(ratings, users, books):
 
     filteredData = filteredData[['ISBN', 'User-ID', 'Book-Rating']]
 
-    return filteredData
+    return filteredData, userData, bookData
 
 
-def ReadTest(testcsv):
+def ReadTest(testcsv, userData, bookData):
 
-    testData = pd.read_csv(testcsv, sep=',', encoding='latin-1', error_bad_lines=False, warn_bad_lines=False)
-    testData = testData[['ISBN', 'User-ID', 'Book-Rating']]
+    ratingData = pd.read_csv(testcsv, sep=',', encoding='latin-1', error_bad_lines=False, warn_bad_lines=False)
+    combinedData = userData.merge(ratingData, right_on= 'User-ID', left_on= 'User-ID', how='inner')
+    combinedData = bookData.merge(combinedData, right_on= 'ISBN', left_on= 'ISBN', how='inner')
+
+    filteredData = combinedData[combinedData['Location'].str.contains("usa|canada")]
+
+    testData = filteredData[['ISBN', 'User-ID', 'Book-Rating']]
 
     return testData
